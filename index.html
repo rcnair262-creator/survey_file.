@@ -42,10 +42,11 @@
       border-radius: 8px; margin-bottom: 15px;
     }
 
-    /* SL Number Badge */
-    .sl-badge {
-      background: #ffeb3b; color: #000; padding: 5px 12px;
-      border-radius: 20px; font-weight: bold; border: 1px solid #e6d328;
+    /* SL Number Input Style */
+    .sl-input {
+      background: #ffeb3b; color: #000; padding: 8px; width: 80px;
+      border-radius: 6px; font-weight: bold; border: 2px solid #e6d328;
+      text-align: center; font-size: 16px;
     }
 
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
@@ -59,15 +60,10 @@
 <body>
 
 <script>
-/* ⚠️ ACTION REQUIRED: 
-   Paste your NEW Web App URL inside the quotes below. 
-   If you deployed a "New Version", the URL might be the same, 
-   but ensure it is the one ending in /exec 
-*/
+/* ⚠️ PASTE YOUR WEB APP URL HERE */
 const LIVE_URL = "https://script.google.com/macros/s/AKfycbxsiECJkDUscrGRW5lp579YZZTYgpomb-mNR2s6Pt6XzhNy86EH0ogu9WLM5AByWwrkqw/exec";
 
 let currentSheetId = "";
-let autoSL = 1; // This variable tracks the current SL Number
 </script>
 
 <div class="box" id="dashboard">
@@ -91,7 +87,10 @@ let autoSL = 1; // This variable tracks the current SL Number
 <div class="box" id="familyBox" style="display:none;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <h2>📝 Family Entry</h2>
-    <div>SL No: <span id="displaySL" class="sl-badge">1</span></div>
+    <div>
+      <label style="margin:0; font-size:12px;">SL No:</label>
+      <input type="number" id="manualSL" class="sl-input" value="1">
+    </div>
   </div>
 
   <label>House Name</label>
@@ -221,9 +220,9 @@ async function selectFile() {
   btn.disabled = false;
 
   if (data) {
-    // Backend returns the LAST used SL (e.g., 5). We need 5 + 1 = 6.
-    autoSL = Number(data.lastSL) + 1;
-    document.getElementById("displaySL").textContent = autoSL;
+    // Set the input value to LastSL + 1
+    let nextSL = Number(data.lastSL) + 1;
+    document.getElementById("manualSL").value = nextSL;
     showPage("familyBox");
   }
 }
@@ -243,8 +242,8 @@ async function createNewCluster() {
     if (data.status === "EXISTS") return alert("File with this name already exists!");
     
     currentSheetId = data.sheetId;
-    autoSL = 1; // New file starts at 1
-    document.getElementById("displaySL").textContent = autoSL;
+    // New file, so suggest 1
+    document.getElementById("manualSL").value = 1; 
     showPage("familyBox");
   }
 }
@@ -294,12 +293,16 @@ async function saveFamily() {
   let house = document.getElementById("house").value.trim();
   let count = Number(document.getElementById("count").value);
   
+  // ✅ GRAB THE MANUAL SL FROM THE INPUT BOX
+  let currentSLInput = document.getElementById("manualSL");
+  let slValue = Number(currentSLInput.value);
+
   if(!house || count < 1) return alert("Please enter House Name and at least 1 member.");
+  if(!slValue) return alert("Please enter a valid SL Number.");
 
   let btn = document.getElementById("btnSave");
   btn.disabled = true;
 
-  // Gather Inputs
   let names = document.querySelectorAll(".inp-name");
   let books = document.querySelectorAll(".inp-book");
   let serials = document.querySelectorAll(".inp-serial");
@@ -313,7 +316,7 @@ async function saveFamily() {
     await apiCall({
       mode: "saveData",
       sheetId: currentSheetId,
-      slno: autoSL, // Send the CURRENT SL
+      slno: slValue, // Send the user-typed SL
       house: house,
       count: count,
       name: names[i].value,
@@ -322,24 +325,20 @@ async function saveFamily() {
       religion: religions[i].value,
       party: parties[i].value,
       active: actives[i].value,
-      showMain: i === 0 // Only first member gets SL/House/Count data
+      showMain: i === 0 
     });
   }
 
-  // ✅ CRITICAL FIX: Increment SL AFTER saving is complete
-  autoSL = autoSL + 1;
-  document.getElementById("displaySL").textContent = autoSL;
+  // ✅ INCREMENT THE INPUT BOX FOR THE USER (Helpful suggestion)
+  currentSLInput.value = slValue + 1;
   
-  // Clear Inputs for next family
+  // Clear other inputs
   document.getElementById("members").innerHTML = "";
   document.getElementById("count").value = "";
   document.getElementById("house").value = "";
   
   btn.textContent = "💾 Save Family";
   btn.disabled = false;
-  
-  // Optional: Tiny toast or alert
-  // alert("Family Saved! Moving to SL: " + autoSL);
 }
 
 // --- Filter Functions ---
