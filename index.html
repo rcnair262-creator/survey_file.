@@ -3,56 +3,32 @@
 <head>
   <title>Election Survey System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    /* --- STYLES --- */
+    /* BASIC STYLING */
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; padding: 20px; color: #333; }
-    
-    .box {
-      background: white; padding: 25px; max-width: 900px; margin: auto;
-      border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
+    .box { background: white; padding: 25px; max-width: 900px; margin: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     h2 { margin-top: 0; color: #444; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-
     label { font-weight: 600; font-size: 14px; color: #555; display: block; margin-top: 10px; }
-
-    input, select, button {
-      width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px;
-      border: 1px solid #ccc; font-size: 15px; box-sizing: border-box;
-    }
-
+    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; box-sizing: border-box; }
     input:focus, select:focus { border-color: #2b7cff; outline: none; }
-
-    button {
-      background: #2b7cff; color: white; border: none; font-weight: bold;
-      cursor: pointer; transition: background 0.2s;
-    }
+    button { background: #2b7cff; color: white; border: none; font-weight: bold; cursor: pointer; }
     button:hover { background: #1a66e0; }
     button:disabled { background: #ccc; cursor: not-allowed; }
-
-    button.red { background: #d43b3b; }
-    button.red:hover { background: #b02a2a; }
+    button.red { background: #d43b3b; } button.red:hover { background: #b02a2a; }
+    button.green { background: #28a745; } button.green:hover { background: #218838; }
     
-    button.green { background: #28a745; }
-    button.green:hover { background: #218838; }
-
-    .member-card {
-      background: #f9f9f9; padding: 15px; border: 1px solid #eee;
-      border-radius: 8px; margin-bottom: 15px;
-    }
-
-    /* SL Number Input Style */
+    .member-card { background: #f9f9f9; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
+    
+    /* SL INPUT STYLE */
     .sl-input {
       background: #ffeb3b; color: #000; padding: 8px; width: 80px;
       border-radius: 6px; font-weight: bold; border: 2px solid #e6d328;
-      text-align: center; font-size: 16px;
+      text-align: center; font-size: 18px;
     }
 
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #f4f4f4; }
-    tr:nth-child(even) { background: #fafafa; }
     .status-active { color: green; font-weight: bold; }
     .status-inactive { color: red; font-weight: bold; }
   </style>
@@ -60,7 +36,7 @@
 <body>
 
 <script>
-/* ⚠️ PASTE YOUR WEB APP URL HERE */
+/* ✅ YOUR URL IS NOW CONFIGURED BELOW */
 const LIVE_URL = "https://script.google.com/macros/s/AKfycbxsiECJkDUscrGRW5lp579YZZTYgpomb-mNR2s6Pt6XzhNy86EH0ogu9WLM5AByWwrkqw/exec";
 
 let currentSheetId = "";
@@ -69,7 +45,7 @@ let currentSheetId = "";
 <div class="box" id="dashboard">
   <h2>📂 Cluster Dashboard</h2>
   
-  <label>Select Existing Cluster File</label>
+  <label>Select Existing File</label>
   <button id="btnLoad" onclick="loadFiles()">🔄 Refresh File List</button>
   <select id="fileList"><option>Loading...</option></select>
   <button class="green" onclick="selectFile()">Open Selected File</button>
@@ -87,7 +63,7 @@ let currentSheetId = "";
 <div class="box" id="familyBox" style="display:none;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <h2>📝 Family Entry</h2>
-    <div>
+    <div style="text-align:right;">
       <label style="margin:0; font-size:12px;">SL No:</label>
       <input type="number" id="manualSL" class="sl-input" value="1">
     </div>
@@ -101,39 +77,21 @@ let currentSheetId = "";
 
   <div id="members"></div>
 
-  <button id="btnSave" class="green" onclick="saveFamily()">💾 Save Family</button>
+  <button id="btnSave" class="green" onclick="saveFamily()">💾 Save Family & Fix Order</button>
   <button class="red" onclick="backToDashboard()">Back to Dashboard</button>
 </div>
 
 <div class="box" id="filterBox" style="display:none;">
   <h2>📊 Filter & Summary</h2>
+  <button class="red" onclick="backToDashboard()">Back</button>
 
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-    <select id="fActive">
-      <option value="">All Status</option>
-      <option>Active</option>
-      <option>Not Active</option>
-    </select>
-    <select id="fParty">
-      <option value="">All Party</option>
-      <option>NDA</option>
-      <option>UDF</option>
-      <option>LDF</option>
-      <option>OTH</option>
-    </select>
+    <select id="fActive"><option value="">All Status</option><option>Active</option><option>Not Active</option></select>
+    <select id="fParty"><option value="">All Party</option><option>NDA</option><option>UDF</option><option>LDF</option><option>OTH</option></select>
   </div>
-
-  <select id="fReligion">
-    <option value="">All Religion</option>
-    <option>Hindu</option>
-    <option>Muslim</option>
-    <option>Christian</option>
-    <option>Others</option>
-  </select>
-
+  <select id="fReligion"><option value="">All Religion</option><option>Hindu</option><option>Muslim</option><option>Christian</option><option>Others</option></select>
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-    <input id="fBook" placeholder="Book No">
-    <input id="fSerial" placeholder="Serial No">
+    <input id="fBook" placeholder="Book No"><input id="fSerial" placeholder="Serial No">
   </div>
 
   <button onclick="applyFilter()">Apply Filter</button>
@@ -143,24 +101,20 @@ let currentSheetId = "";
     <button class="green" onclick="downloadCSV()">Download CSV</button>
   </div>
   
-  <button class="red" onclick="backToDashboard()">Back</button>
-
-  <div id="filterSummary" style="margin-top:15px; padding:10px; background:#e8f0fe; border-radius:5px; font-size:14px;"></div>
+  <div id="filterSummary" style="margin-top:15px; padding:10px; background:#e8f0fe;"></div>
   <div id="filterResults" style="overflow-x:auto;"></div>
 </div>
 
 <script>
-// --- Navigation ---
+// --- PAGE NAVIGATION ---
 function showPage(id) {
   document.querySelectorAll('.box').forEach(b => b.style.display = 'none');
   document.getElementById(id).style.display = 'block';
 }
 
-function backToDashboard() {
-  showPage("dashboard");
-}
+function backToDashboard() { showPage("dashboard"); }
 
-// --- API Helper ---
+// --- API FUNCTION ---
 async function apiCall(data) {
   try {
     let res = await fetch(LIVE_URL, {
@@ -174,53 +128,28 @@ async function apiCall(data) {
   }
 }
 
-// --- Dashboard Functions ---
+// --- FILE OPERATIONS ---
 async function loadFiles() {
-  let btn = document.getElementById("btnLoad");
-  btn.textContent = "Loading...";
-  btn.disabled = true;
-
+  let btn = document.getElementById("btnLoad"); btn.disabled = true;
   let data = await apiCall({ mode: "listFiles" });
-  
-  let list = document.getElementById("fileList");
-  list.innerHTML = "";
+  let list = document.getElementById("fileList"); list.innerHTML = "";
 
   if (data && data.files) {
     data.files.forEach(f => {
-      let opt = document.createElement("option");
-      opt.value = f.id;
-      opt.textContent = f.name;
-      list.appendChild(opt);
+      let opt = document.createElement("option"); opt.value = f.id; opt.textContent = f.name; list.appendChild(opt);
     });
-    if(data.files.length === 0) {
-      let opt = document.createElement("option");
-      opt.textContent = "No files found";
-      list.appendChild(opt);
-    }
+    if(data.files.length === 0) list.innerHTML = "<option>No files found</option>";
   }
-
-  btn.textContent = "🔄 Refresh File List";
   btn.disabled = false;
 }
 
 async function selectFile() {
   currentSheetId = document.getElementById("fileList").value;
-  if (!currentSheetId || currentSheetId === "Loading..." || currentSheetId === "No files found") {
-    return alert("Please select a valid file first.");
-  }
+  if (!currentSheetId) return alert("Select a file");
 
-  let btn = document.querySelector("button[onclick='selectFile()']");
-  btn.textContent = "Opening...";
-  btn.disabled = true;
-
-  // Get last SL number from server
   let data = await apiCall({ mode: "getLastSL", sheetId: currentSheetId });
-  
-  btn.textContent = "Open Selected File";
-  btn.disabled = false;
-
   if (data) {
-    // Set the input value to LastSL + 1
+    // Suggest Max + 1, but user can change it
     let nextSL = Number(data.lastSL) + 1;
     document.getElementById("manualSL").value = nextSL;
     showPage("familyBox");
@@ -235,20 +164,17 @@ async function createNewCluster() {
   btn.disabled = true; btn.textContent = "Creating...";
 
   let data = await apiCall({ mode: "createFile", clusterName: name });
-
   btn.disabled = false; btn.textContent = "➕ Create New File";
 
   if (data) {
-    if (data.status === "EXISTS") return alert("File with this name already exists!");
-    
+    if (data.status === "EXISTS") return alert("File already exists!");
     currentSheetId = data.sheetId;
-    // New file, so suggest 1
-    document.getElementById("manualSL").value = 1; 
+    document.getElementById("manualSL").value = 1; // New file starts at 1
     showPage("familyBox");
   }
 }
 
-// --- Family Entry Functions ---
+// --- FAMILY ENTRY ---
 function createMembers() {
   let count = Number(document.getElementById("count").value);
   let box = document.getElementById("members");
@@ -257,51 +183,31 @@ function createMembers() {
   for (let i = 1; i <= count; i++) {
     box.innerHTML += `
       <div class="member-card">
-        <h4 style="margin-top:0;">Member ${i}</h4>
+        <h4>Member ${i}</h4>
         <input placeholder="Name" class="inp-name">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <input placeholder="Book No" class="inp-book">
           <input placeholder="Serial No" class="inp-serial">
         </div>
-
-        <select class="sel-religion">
-          <option>Hindu</option>
-          <option>Muslim</option>
-          <option>Christian</option>
-          <option>Others</option>
-        </select>
-
+        <select class="sel-religion"><option>Hindu</option><option>Muslim</option><option>Christian</option><option>Others</option></select>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <select class="sel-party">
-            <option>NDA</option>
-            <option>UDF</option>
-            <option>LDF</option>
-            <option>OTH</option>
-          </select>
-
-          <select class="sel-active">
-            <option>Active</option>
-            <option>Not Active</option>
-          </select>
+          <select class="sel-party"><option>NDA</option><option>UDF</option><option>LDF</option><option>OTH</option></select>
+          <select class="sel-active"><option>Active</option><option>Not Active</option></select>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 }
 
 async function saveFamily() {
   let house = document.getElementById("house").value.trim();
   let count = Number(document.getElementById("count").value);
-  
-  // ✅ GRAB THE MANUAL SL FROM THE INPUT BOX
-  let currentSLInput = document.getElementById("manualSL");
-  let slValue = Number(currentSLInput.value);
+  let slValue = Number(document.getElementById("manualSL").value); // Use Manual Input
 
-  if(!house || count < 1) return alert("Please enter House Name and at least 1 member.");
-  if(!slValue) return alert("Please enter a valid SL Number.");
+  if(!house || count < 1) return alert("Enter House and Members");
+  if(!slValue) return alert("Enter SL No");
 
   let btn = document.getElementById("btnSave");
-  btn.disabled = true;
+  btn.disabled = true; btn.textContent = "Saving & Organizing...";
 
   let names = document.querySelectorAll(".inp-name");
   let books = document.querySelectorAll(".inp-book");
@@ -311,12 +217,10 @@ async function saveFamily() {
   let actives = document.querySelectorAll(".sel-active");
 
   for (let i = 0; i < names.length; i++) {
-    btn.textContent = `Saving Member ${i+1} of ${count}...`;
-    
     await apiCall({
       mode: "saveData",
       sheetId: currentSheetId,
-      slno: slValue, // Send the user-typed SL
+      slno: slValue, // Send manual SL
       house: house,
       count: count,
       name: names[i].value,
@@ -329,29 +233,23 @@ async function saveFamily() {
     });
   }
 
-  // ✅ INCREMENT THE INPUT BOX FOR THE USER (Helpful suggestion)
-  currentSLInput.value = slValue + 1;
-  
-  // Clear other inputs
+  // Update Suggestion for next entry
+  let data = await apiCall({ mode: "getLastSL", sheetId: currentSheetId });
+  if (data) {
+    document.getElementById("manualSL").value = Number(data.lastSL) + 1;
+  }
+
+  // Clear Form
   document.getElementById("members").innerHTML = "";
   document.getElementById("count").value = "";
   document.getElementById("house").value = "";
   
-  btn.textContent = "💾 Save Family";
+  btn.textContent = "💾 Save Family & Fix Order";
   btn.disabled = false;
 }
 
-// --- Filter Functions ---
-function openFilter() {
-  if(!currentSheetId) return alert("Please load and select a file first from Dashboard.");
-  showPage("filterBox");
-}
-
+// --- FILTER & EXCEL ---
 async function applyFilter() {
-  let btn = document.querySelector("button[onclick='applyFilter()']");
-  btn.textContent = "Filtering...";
-  btn.disabled = true;
-
   let filters = {
     active: document.getElementById("fActive").value,
     party: document.getElementById("fParty").value,
@@ -360,60 +258,22 @@ async function applyFilter() {
     serial: document.getElementById("fSerial").value.trim()
   };
 
-  let data = await apiCall({
-    mode: "filter",
-    sheetId: currentSheetId,
-    filters: filters
-  });
-
-  btn.textContent = "Apply Filter";
-  btn.disabled = false;
+  let data = await apiCall({ mode: "filter", sheetId: currentSheetId, filters: filters });
 
   if (data) {
     let s = data.summary;
-    let summaryHtml = `
-      <b>Total:</b> ${s.total} &nbsp;|&nbsp; 
-      <span style="color:green">Active: ${s.active}</span> &nbsp;|&nbsp; 
-      <span style="color:red">Inactive: ${s.notActive}</span><br>
-      <small>NDA: ${s.party.NDA} | UDF: ${s.party.UDF} | LDF: ${s.party.LDF} | OTH: ${s.party.OTH}</small>
-    `;
-    document.getElementById("filterSummary").innerHTML = summaryHtml;
-
-    let html = `<table>
-      <tr>
-        <th>SL</th><th>House</th><th>Name</th>
-        <th>Book</th><th>Sl.No</th>
-        <th>Rel</th><th>Party</th><th>Status</th>
-      </tr>`;
-
-    data.data.forEach(r => {
-      let statusClass = r.active === "Active" ? "status-active" : "status-inactive";
-      html += `<tr>
-        <td>${r.slno}</td>
-        <td>${r.house}</td>
-        <td>${r.name}</td>
-        <td>${r.book}</td>
-        <td>${r.serial}</td>
-        <td>${r.religion}</td>
-        <td>${r.party}</td>
-        <td class="${statusClass}">${r.active}</td>
-      </tr>`;
-    });
-
-    html += "</table>";
-    document.getElementById("filterResults").innerHTML = html;
+    document.getElementById("filterSummary").innerHTML = `<b>Total:</b> ${s.total} | Active: ${s.active} | Inactive: ${s.notActive} <br> NDA: ${s.party.NDA}, UDF: ${s.party.UDF}, LDF: ${s.party.LDF}`;
+    
+    let html = "<table><tr><th>SL</th><th>House</th><th>Name</th><th>Book</th><th>Party</th></tr>";
+    data.data.forEach(r => html += `<tr><td>${r.slno}</td><td>${r.house}</td><td>${r.name}</td><td>${r.book}</td><td>${r.party}</td></tr>`);
+    document.getElementById("filterResults").innerHTML = html + "</table>";
   }
 }
 
-function openExcel() {
-  if(currentSheetId) window.open("https://docs.google.com/spreadsheets/d/" + currentSheetId, "_blank");
-}
+function openExcel() { window.open("https://docs.google.com/spreadsheets/d/" + currentSheetId, "_blank"); }
+function downloadCSV() { window.open("https://docs.google.com/spreadsheets/d/" + currentSheetId + "/export?format=csv", "_blank"); }
 
-function downloadCSV() {
-  if(currentSheetId) window.open("https://docs.google.com/spreadsheets/d/" + currentSheetId + "/export?format=csv", "_blank");
-}
-
-// Initial Load
+// Init
 loadFiles();
 </script>
 
