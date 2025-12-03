@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    /* --- STYLES --- */
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; padding: 20px; color: #333; }
     
     .box {
@@ -41,11 +42,16 @@
       border-radius: 8px; margin-bottom: 15px;
     }
 
+    /* SL Number Badge */
+    .sl-badge {
+      background: #ffeb3b; color: #000; padding: 5px 12px;
+      border-radius: 20px; font-weight: bold; border: 1px solid #e6d328;
+    }
+
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #f4f4f4; }
     tr:nth-child(even) { background: #fafafa; }
-
     .status-active { color: green; font-weight: bold; }
     .status-inactive { color: red; font-weight: bold; }
   </style>
@@ -53,13 +59,15 @@
 <body>
 
 <script>
-/* ⚠️ IMPORTANT: REPLACE THIS URL WITH YOUR NEW DEPLOYED SCRIPT URL 
-   If you re-deployed the script, this URL might have changed!
+/* ⚠️ ACTION REQUIRED: 
+   Paste your NEW Web App URL inside the quotes below. 
+   If you deployed a "New Version", the URL might be the same, 
+   but ensure it is the one ending in /exec 
 */
 const LIVE_URL = "https://script.google.com/macros/s/AKfycbxsiECJkDUscrGRW5lp579YZZTYgpomb-mNR2s6Pt6XzhNy86EH0ogu9WLM5AByWwrkqw/exec";
 
 let currentSheetId = "";
-let autoSL = 1;
+let autoSL = 1; // This variable tracks the current SL Number
 </script>
 
 <div class="box" id="dashboard">
@@ -83,7 +91,7 @@ let autoSL = 1;
 <div class="box" id="familyBox" style="display:none;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <h2>📝 Family Entry</h2>
-    <span style="font-size:12px; background:#eee; padding:5px 10px; border-radius:4px;">SL No: <b id="displaySL">0</b></span>
+    <div>SL No: <span id="displaySL" class="sl-badge">1</span></div>
   </div>
 
   <label>House Name</label>
@@ -202,9 +210,18 @@ async function selectFile() {
     return alert("Please select a valid file first.");
   }
 
-  // Get last SL number
+  let btn = document.querySelector("button[onclick='selectFile()']");
+  btn.textContent = "Opening...";
+  btn.disabled = true;
+
+  // Get last SL number from server
   let data = await apiCall({ mode: "getLastSL", sheetId: currentSheetId });
+  
+  btn.textContent = "Open Selected File";
+  btn.disabled = false;
+
   if (data) {
+    // Backend returns the LAST used SL (e.g., 5). We need 5 + 1 = 6.
     autoSL = Number(data.lastSL) + 1;
     document.getElementById("displaySL").textContent = autoSL;
     showPage("familyBox");
@@ -226,7 +243,7 @@ async function createNewCluster() {
     if (data.status === "EXISTS") return alert("File with this name already exists!");
     
     currentSheetId = data.sheetId;
-    autoSL = 1;
+    autoSL = 1; // New file starts at 1
     document.getElementById("displaySL").textContent = autoSL;
     showPage("familyBox");
   }
@@ -282,7 +299,7 @@ async function saveFamily() {
   let btn = document.getElementById("btnSave");
   btn.disabled = true;
 
-  // Select inputs using classes to ensure correct order
+  // Gather Inputs
   let names = document.querySelectorAll(".inp-name");
   let books = document.querySelectorAll(".inp-book");
   let serials = document.querySelectorAll(".inp-serial");
@@ -294,9 +311,9 @@ async function saveFamily() {
     btn.textContent = `Saving Member ${i+1} of ${count}...`;
     
     await apiCall({
-      mode: "saveData", // ✅ CRITICAL: This matches the backend requirement
+      mode: "saveData",
       sheetId: currentSheetId,
-      slno: autoSL,
+      slno: autoSL, // Send the CURRENT SL
       house: house,
       count: count,
       name: names[i].value,
@@ -305,20 +322,24 @@ async function saveFamily() {
       religion: religions[i].value,
       party: parties[i].value,
       active: actives[i].value,
-      showMain: i === 0 // Only show House/SL details on the first row
+      showMain: i === 0 // Only first member gets SL/House/Count data
     });
   }
 
-  // Reset UI
-  autoSL++;
+  // ✅ CRITICAL FIX: Increment SL AFTER saving is complete
+  autoSL = autoSL + 1;
   document.getElementById("displaySL").textContent = autoSL;
+  
+  // Clear Inputs for next family
   document.getElementById("members").innerHTML = "";
   document.getElementById("count").value = "";
   document.getElementById("house").value = "";
   
   btn.textContent = "💾 Save Family";
   btn.disabled = false;
-  alert("Family Saved Successfully!");
+  
+  // Optional: Tiny toast or alert
+  // alert("Family Saved! Moving to SL: " + autoSL);
 }
 
 // --- Filter Functions ---
@@ -350,7 +371,6 @@ async function applyFilter() {
   btn.disabled = false;
 
   if (data) {
-    // Summary
     let s = data.summary;
     let summaryHtml = `
       <b>Total:</b> ${s.total} &nbsp;|&nbsp; 
@@ -360,7 +380,6 @@ async function applyFilter() {
     `;
     document.getElementById("filterSummary").innerHTML = summaryHtml;
 
-    // Table
     let html = `<table>
       <tr>
         <th>SL</th><th>House</th><th>Name</th>
